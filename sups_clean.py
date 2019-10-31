@@ -28,15 +28,17 @@ def main():
     
     CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
     
-    LOG_PATH = '/sansto/logs/fos/supshow_logs'
-    LOG_FILE = LOG_PATH + '/supshow_fmt_clean.log'
+    LOG_PATH = os.path.join(CURRENT_DIR, 'logs')
+    OUTPUT_PATH = os.path.join(CURRENT_DIR, 'output')
+
+    LOG_FILE = os.path.join(LOG_PATH, 'sup_clean.log')
     
-    COLLECT_PATH = '/sansto/tmp/fos/supshow_collect/'
-    PARSING_PATH = '/sansto/tmp/fos/supshow_parsing/'
-    FINAL_PATH = '/sansto/output/fos'
+    COLLECT_PATH = os.path.join(OUTPUT_PATH, 'fos_cmd')
+    PARSING_PATH = os.path.join(OUTPUT_PATH, 'sup_pars')
+    FINAL_PATH = os.path.join(CURRENT_DIR, 'output/final')
     
-    ARCHIVE_PARSING_PATH = '/sansto/arch/fos/supshow_parsing/'
-    ARCHIVE_COLLECT_PATH = '/sansto/arch/fos/supshow_collect/'
+    ARCHIVE_PARSING_PATH = os.path.join(CURRENT_DIR, 'arch/sup_pars')
+    ARCHIVE_COLLECT_PATH = os.path.join(CURRENT_DIR, 'arch/fos_cmd')
     
     ### Gestion des arguments ###
     
@@ -62,7 +64,7 @@ def main():
         COLLECT_PATH = '{0}/{1}'.format(args.collect_path, DATE_FMT)    
         PARSING_PATH = '{0}/{1}'.format(args.parsing_path, DATE_FMT)    
     
-    WWN_CSV_FILE = PARSING_PATH + '/supshow_parse_wwn_{0}.csv'.format(DATE_FMT)
+    WWN_CSV_FILE = os.path.join(PARSING_PATH, 'supshow_parse_wwn_{0}.csv'.format(DATE_FMT))
     
     CSV_FILE_DIC = {
         'listeZone' : '{0}/supshow_parse_zone_{1}.csv'.format(PARSING_PATH, DATE_FMT),
@@ -117,20 +119,22 @@ def main():
             LOGGER.error('File : {0} Not Find ! exit()'.format(file))
             sys.exit(1)
         
-    ### Création du Répertoire 'FINAL_PATH' ###
+    ### Création du Répertoire 'FINAL_PATH + ARCHIVE' ###
     
     LOGGER.info('Final Output Path : {0}'.format(FINAL_PATH))
+    LOGGER.info('Archive Output Path : {0}'.format([ARCHIVE_PARSING_PATH, ARCHIVE_COLLECT_PATH]))
     
-    if not os.path.exists(FINAL_PATH):
-        LOGGER.warning('Path : {0} Not Exist ! Script Create it'.format(FINAL_PATH))
-        
-        try:
-            os.makedirs(FINAL_PATH)
-            LOGGER.info('Create {0} [done]'.format(FINAL_PATH))
+    for path in [FINAL_PATH, ARCHIVE_PARSING_PATH, ARCHIVE_COLLECT_PATH]:
+        if not os.path.exists(path):
+            LOGGER.warning('Path : {0} Not Exist ! Script Create it'.format(path))
             
-        except:
-            LOGGER.error('Creation {0} Problem ! exit()'.format(FINAL_PATH))
-            sys.exit(1)
+            try:
+                os.makedirs(path)
+                LOGGER.info('Create {0} [done]'.format(path))
+                
+            except:
+                LOGGER.error('Creation {0} Problem ! exit()'.format(path))
+                sys.exit(1)
         
     ### Modification du fichier WWN ###
     

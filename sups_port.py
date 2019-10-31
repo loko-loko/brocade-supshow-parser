@@ -746,13 +746,13 @@ if __name__ == '__main__':
     START_TIME = time.time()
     SESSION_ID = str(random.random())[2:8]
     
-    LOG_PATH = '/sansto/logs/fos/supshow_logs'
-    INPUT_PATH = '/sansto/tmp/fos/supshow_collect'
-    OUTPUT_PATH = '/sansto/tmp/fos/supshow_parsing'
-    
     CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+    LOG_PATH = os.path.join(CURRENT_DIR, 'logs')
+    INPUT_PATH = os.path.join(CURRENT_DIR, 'output/fos_cmd')
+    OUTPUT_PATH = os.path.join(CURRENT_DIR, 'output/sup_pars')
     
-    LOG_FILE = LOG_PATH + '/supshow_parse_port.log'
+    LOG_FILE = os.path.join(LOG_PATH, 'sup_port.log')
     
     ### Gestion des arguments ###
     
@@ -777,9 +777,14 @@ if __name__ == '__main__':
     else:    
         INPUT_PATH = '{0}/{1}'.format(args.input_path, time.strftime("%Y_%m_%d"))    
         OUTPUT_PATH = '{0}/{1}'.format(args.output_path, time.strftime("%Y_%m_%d"))    
-        
+ 
+    ### Log path creation ###
+
+    if not os.path.exists(LOG_PATH):
+        os.makedirs(LOG_PATH)
+
     ### Initialisation du Logger ###
-    
+
     LOGGER = logging.getLogger()
     LOGGER.setLevel(logging.INFO)
     

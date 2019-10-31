@@ -91,8 +91,9 @@ def format_cmd(command_lst, vf_command_lst):
     return command_dic
     
 def format_sw_list(logger, sw_lst, except_sw_lst):
-    """ Création de file de switchs en fonction de leurs nomenclatures par Localisation et MetaSAN [Nomenclature switch BP2i] """
-    
+    """ Création de file de switchs """
+    #NOTE(LK): To customize
+
     result = []
     
     logger.info('Format Switch List')
@@ -102,71 +103,15 @@ def format_sw_list(logger, sw_lst, except_sw_lst):
         sw_dic = {}
         
         sw_dic['sw_name'] = sw
-        sw_dic['sw_msan'] = sw_dic['sw_name'][1]
+        sw_dic['sw_san'] = sw_dic['sw_name'][-1]
         
         sw_dic['sw_type'] = 'odd'
         
-        if int(sw_dic['sw_name'][-1]) % 2 != 0:
+        if re.search('\d', sw_dic['sw_san']) and int(sw_dic['sw_san']) % 2 != 0:
             sw_dic['sw_type'] = 'even'
-        
-        if sw_dic['sw_msan'] == 'w':
-            sw_dic['sw_msan'] = '1'
-        
-        if sw_dic['sw_msan'] == 'b':
-            sw_dic['sw_msan'] = sw_dic['sw_name'][0:4].upper()
-            sw_dic['sw_loc'] = sw_dic['sw_name'][4:6].upper()
-            
-        else:
-            sw_dic['sw_loc'] = sw_dic['sw_name'][5:7].upper()
-            
-            if len(sw_dic['sw_name']) != 10 and re.search('(N|S)0', sw_dic['sw_loc']):
-                sw_dic['sw_loc'] = sw_dic['sw_name'][4:6].upper()
-            
-        if re.search('^(M|V|Y)(A|N|E|[0-9])', sw_dic['sw_loc']):
-            
-            if 'V' in sw_dic['sw_loc']:
-                sw_dic['sw_loc'] = 'VA'
-                
-            sw_dic['sw_msan'] = 'FR_' + sw_dic['sw_msan'] + '_' + sw_dic['sw_loc']
-                
-            
-        elif re.search('^B(N|S)', sw_dic['sw_loc']):
-            sw_dic['sw_msan'] = 'BE_' + sw_dic['sw_msan'] + '_' + sw_dic['sw_loc']
-        
-        elif re.search('^PM|AD', sw_dic['sw_loc']):
-            
-            if re.search('sw51', sw_dic['sw_name']):
-                sw_dic['sw_msan'] = 'SAV'
-                
-            sw_dic['sw_msan'] = 'IT_' + sw_dic['sw_msan']
-            
-        
-        ### Gestion des Exceptions ###
-        
-        if re.search('_[A-Z]B0[1-9]+_', sw_dic['sw_msan']):
-            sw_dic['sw_msan'] = sw_dic['sw_msan'].split('_')[0] + '_' + sw_dic['sw_msan'].split('_')[1]
-        
-        elif re.search('FR_1_M1', sw_dic['sw_msan']):
-            sw_dic['sw_msan'] = 'FR_1_M2'
-            
-        elif re.search('^FR_4_', sw_dic['sw_msan']):
-            sw_dic['sw_msan'] = 'FR_4_ALL'
-            
-        elif re.search('FR_2_M8', sw_dic['sw_msan']):
-            sw_dic['sw_msan'] = 'FR_2_M7'
-            
-        elif re.search('FR_[2-3]_VA', sw_dic['sw_msan']):
-            sw_dic['sw_msan'] = 'FR_23_VA'
-         
-        elif re.search('FR_1_Y', sw_dic['sw_msan']):
-            sw_dic['sw_msan'] = 'FR_1_Y13'
-        
-        elif re.search('FR_3_M[5-6]', sw_dic['sw_msan']):
-            sw_dic['sw_msan'] = 'FR_3_M56'
-        
-        elif sw_dic['sw_name'] in except_sw_lst:
-            sw_dic['sw_msan'] = 'EXCEPT_LST'
-            
+
+        sw_dic['sw_loc'] = 'HK'             
+    
         result.append(sw_dic)
     
     return result
@@ -178,14 +123,14 @@ def generate_queue(logger, sw_dic_lst):
     
     logger.info('Generating Queue')
     
-    msan_lst = list(set([s['sw_msan'] for s in sw_dic_lst]))
+    msan_lst = list(set([s['sw_san'] for s in sw_dic_lst]))
     
     for msan in msan_lst:
         
         dic = {}
         
-        dic['sw_msan'] = msan
-        dic['sw_lst'] = sorted([s for s in sw_dic_lst if s['sw_msan'] == msan], key=itemgetter('sw_type'))
+        dic['sw_san'] = msan
+        dic['sw_lst'] = sorted([s for s in sw_dic_lst if s['sw_san'] == msan], key=itemgetter('sw_type'))
         
         result.append(dic)
         
@@ -281,7 +226,7 @@ def sw_collect_manage(logger, output_path, user, command_dic, sw_loc):
     
     sw_supshow_failed_lst = []
     
-    logger.info('PID:{0}, M.SAN:{1}, P.NAME:{2}, SWITCH COUNT:{3} [start]'.format(pid, sw_loc['sw_msan'], name, len(sw_loc['sw_lst'])))
+    logger.info('PID:{0}, M.SAN:{1}, P.NAME:{2}, SWITCH COUNT:{3} [start]'.format(pid, sw_loc['sw_san'], name, len(sw_loc['sw_lst'])))
     
     time.sleep(.5)
     
@@ -289,7 +234,7 @@ def sw_collect_manage(logger, output_path, user, command_dic, sw_loc):
         
         process_start_time = time.time()
         
-        logger.info('P:{0}, M:{1}, L:{2}, S:{3} [start]'.format(pid, sw['sw_msan'], sw['sw_loc'], sw['sw_name']))
+        logger.info('P:{0}, M:{1}, L:{2}, S:{3} [start]'.format(pid, sw['sw_san'], sw['sw_loc'], sw['sw_name']))
         
         return_collect = sw_collect_exec(logger, output_path, user, sw['sw_name'], command_dic)
         
@@ -334,7 +279,7 @@ def sw_collect_manage(logger, output_path, user, command_dic, sw_loc):
                     # sw_supshow_failed_lst.remove(sw)
                     
                 
-    logger.info('PID:{0}, M.SAN:{1}, P.NAME:{2}, SWITCH COUNT:{3} [terminate]'.format(pid, sw_loc['sw_msan'], name, len(sw_loc['sw_lst'])))
+    logger.info('PID:{0}, M.SAN:{1}, P.NAME:{2}, SWITCH COUNT:{3} [terminate]'.format(pid, sw_loc['sw_san'], name, len(sw_loc['sw_lst'])))
     
     
     ### Corp ###
@@ -350,17 +295,13 @@ if __name__ == '__main__':
     START_TIME = time.time()
     SESSION_ID = str(random.random())[2:8]
     
-    ETC_PATH = '/sansto/etc/fos'
-    LOG_PATH = '/sansto/logs/fos/supshow_logs'
-    OUTPUT_PATH = '/sansto/tmp/fos/supshow_collect'
-    
-    LOG_FILE = '{0}/fos_cmd_collect.log'.format(LOG_PATH)
-    ETC_FILE = '{0}/collect_sw_list.txt'.format(ETC_PATH)
-    
-    
-    
     CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+    LOG_PATH = os.path.join(CURRENT_DIR, 'logs')
+    OUTPUT_PATH = os.path.join(CURRENT_DIR, 'output/fos_cmd')
     
+    LOG_FILE = os.path.join(LOG_PATH, 'fos_cmd.log')
+     
     ### Gestion des arguments ###
     
     parser = argparse.ArgumentParser()
@@ -368,7 +309,7 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--debug', action="store_true", help='Debug Mode')
     parser.add_argument('-c', '--command', help='Command to Collect')
     parser.add_argument('-v', '--vf_command', help='VF Command to Collect')
-    parser.add_argument('-s', '--switch', help='Switchs List')
+    parser.add_argument('-s', '--switch', required=True, help='Switchs List')
     parser.add_argument('-o', '--output_path', help='Select Output Path', default=OUTPUT_PATH)
     
     args = parser.parse_args()
@@ -396,7 +337,12 @@ if __name__ == '__main__':
         OUTPUT_PATH = '{0}/{1}'.format(args.output_path, time.strftime("%Y_%m_%d"))
     
     command_dic = format_cmd(command_lst, vf_command_lst)
-    
+ 
+    ### Log path creation ###
+
+    if not os.path.exists(LOG_PATH):
+        os.makedirs(LOG_PATH)
+        
     ### Listes des switchs à exclure de la collecte ###
     
     EXCEPT_SW_LST = []
@@ -443,36 +389,28 @@ if __name__ == '__main__':
             LOGGER.error('Delete {0} [Problem]'.format(OUTPUT_PATH))
             exit(1)
         
-    
     try:
         os.makedirs(OUTPUT_PATH)
         LOGGER.info('Create {0} [Done]'.format(OUTPUT_PATH))
     except:
         LOGGER.error('Creation {0} [Problem]'.format(OUTPUT_PATH))
         exit(1)
-        
-        
+   
     ### Formatage des switchs par Site et Queue ###
     
-    if sw_lst_arg:
-        input_sw_lst = sw_lst_arg.split(',')
+    input_sw_lst = sw_lst_arg.split(',')
     
-    else:
-        with open(ETC_FILE, "r") as csvfile :
-            input_sw_lst = [c[0] for c in csv.reader(csvfile, delimiter=';') if not re.search('^\s*(#|$)', c[0])]
-            
-            
     sw_dic_lst = format_sw_list(LOGGER, input_sw_lst, EXCEPT_SW_LST)
     sw_loc_lst = generate_queue(LOGGER, sw_dic_lst)
     
-    msan_lst = list(set([s['sw_msan'] for s in sw_dic_lst]))
+    msan_lst = list(set([s['sw_san'] for s in sw_dic_lst]))
     
     ### Affichage des files de switchs ###
     
     LOGGER.info('{0} Switchs - Generating of {1} Queue'.format(len(sw_dic_lst), len(sw_loc_lst)))
     
     for sw_loc in sw_loc_lst:
-        LOGGER.info('{0} SW -> {1:<12} : {2}'.format(str(len(sw_loc['sw_lst'])).zfill(2), sw_loc['sw_msan'], ','.join([s['sw_name'] for s in sw_loc['sw_lst']])))
+        LOGGER.info('{0} SW -> {1:<12} : {2}'.format(str(len(sw_loc['sw_lst'])).zfill(2), sw_loc['sw_san'], ','.join([s['sw_name'] for s in sw_loc['sw_lst']])))
     
     ### Lancement de la collecte en Multithread ###
     

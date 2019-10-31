@@ -358,14 +358,14 @@ if __name__ == '__main__':
     
     START_TIME = time.time()
     SESSION_ID = str(random.random())[2:8]
-    
-    LOG_PATH = '/sansto/logs/fos/supshow_logs'
-    INPUT_PATH = '/sansto/tmp/fos/supshow_collect'
-    OUTPUT_PATH = '/sansto/tmp/fos/supshow_parsing'
-    
-    LOG_FILE = LOG_PATH + '/supshow_parse_zone.log'
-    
+
     CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+    LOG_PATH = os.path.join(CURRENT_DIR, 'logs')
+    INPUT_PATH = os.path.join(CURRENT_DIR, 'output/fos_cmd')
+    OUTPUT_PATH = os.path.join(CURRENT_DIR, 'output/sup_pars')
+    
+    LOG_FILE = os.path.join(LOG_PATH, 'sup_zone.log')
     
     ### Gestion des arguments ###
     
@@ -391,8 +391,8 @@ if __name__ == '__main__':
         INPUT_PATH = '{0}/{1}'.format(args.input_path, time.strftime("%Y_%m_%d"))    
         OUTPUT_PATH = '{0}/{1}'.format(args.output_path, time.strftime("%Y_%m_%d"))    
     
-    WWN_CSV_FILE = OUTPUT_PATH + '/supshow_parse_wwn_{0}.csv'.format(time.strftime("%Y_%m_%d"))
-    PRI_CSV_FILE = OUTPUT_PATH + '/supshow_parse_pri_{0}.csv'.format(time.strftime("%Y_%m_%d"))
+    WWN_CSV_FILE = os.path.join(OUTPUT_PATH, 'supshow_parse_wwn_{0}.csv'.format(time.strftime("%Y_%m_%d")))
+    PRI_CSV_FILE = os.path.join(OUTPUT_PATH, 'supshow_parse_pri_{0}.csv'.format(time.strftime("%Y_%m_%d")))
     
     ### Initialisation du Logger ###
     
