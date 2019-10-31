@@ -169,7 +169,7 @@ def sw_collect_exec(logger, output_path, user, sw, command_dic):
                         
                         for cmd in cmd_lst:
                         
-                            ### Génération de l'output (ex: command.swdxem6070.128.2018_01_05.out) ###
+                            ### Génération de l'output (ex: command.switch001.128.2018_01_05.out) ###
                             
                             output_file = '{0}/{1}.{2}.{3}.{4}.out'.format(output_path, cmd.replace(' ', '_'), sw.lower(), fid, time.strftime("%Y_%m_%d"))
                             
@@ -193,7 +193,7 @@ def sw_collect_exec(logger, output_path, user, sw, command_dic):
             
                 for cmd in cmd_lst:
             
-                    ### Génération de l'output (ex: command.swdxem6070.2018_01_05.out) ###
+                    ### Génération de l'output (ex: command.switch001.2018_01_05.out) ###
                     
                     output_file = '{0}/{1}.{2}.{3}.out'.format(output_path, cmd.replace(' ', '_').replace('-', ''), sw.lower(), time.strftime("%Y_%m_%d"))
                     
@@ -250,35 +250,6 @@ def sw_collect_manage(logger, output_path, user, command_dic, sw_loc):
         else: 
             logger.info('collect done for switch {0} [T:{1}]'.format(sw['sw_name'], process_end_time))
             
-    # if sw_supshow_failed_lst:
-        
-        # max_retry_count = 3
-        
-        # while sw_supshow_failed_lst:
-            
-            # for sw in sw_supshow_failed_lst:
-                
-                # process_start_time = time.time()
-                
-                # logger.info('Pid:{0}, Switch:{1} [Retry:{2}] [start]'.format(pid, sw, retry_count))
-                
-                # return_collect = sw_collect_exec(logger, output_path, user, sw, command_dic)
-                
-                # process_end_time = time.strftime("%H:%M:%S", time.gmtime((time.time() - process_start_time)))
-                
-                # if return_collect is 1: 
-                    # logger.error('collect error for switch {0} [T:{1}]'.format(sw, process_end_time))
-                    # sw_supshow_failed_lst.remove(sw)
-                    
-                # elif return_collect is 2:
-                    # logger.warning('Retry failed on {0}, Retry after ! Pass [{1}]'.format(sw, process_end_time))
-                    # retry_count += 1
-                    
-                # else: 
-                    # logger.info('collect done for switch {0} [T:{1}]'.format(sw, process_end_time))
-                    # sw_supshow_failed_lst.remove(sw)
-                    
-                
     logger.info('PID:{0}, M.SAN:{1}, P.NAME:{2}, SWITCH COUNT:{3} [terminate]'.format(pid, sw_loc['sw_san'], name, len(sw_loc['sw_lst'])))
     
     
