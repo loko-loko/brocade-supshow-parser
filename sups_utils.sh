@@ -1,7 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
 PYTHON_BIN='/usr/bin/python'
-SCRIPT_PATH='/sansto/bin/fos/supshow_script'
+SCRIPT_PATH=$(dirname "$0")
+
+SWITCH_FILE=${SCRIPT_PATH}/sw_list.txt
+
+[ ! -e $SWITCH_FILE ] && { echo "<!> Switch file inventory not find: $SWITCH_FILE"; exit 1; }
 
 py_script_exec() {
     py_script=$1
@@ -19,7 +23,10 @@ py_script_exec() {
 
 }
 
-ALL_R=0; COLLECT=0; PARSE_PORT=0; PARSE_ZONE=0
+ALL_R=0
+COLLECT=0
+PARSE_PORT=0
+PARSE_ZONE=0
 
 for i in $(seq $#); do
     
@@ -37,13 +44,15 @@ done
 [[ $# == 0 ]] && ALL_R=1
 [[ $ALL_R == 1 ]] && { COLLECT=1; PARSE_PORT=1; PARSE_ZONE=1; }
 
+SWITCH_LIST_FMT=$(cat $SWITCH_FILE)
+SWITCH_LIST_FMT=$(echo $SWITCH_LIST_FMT | sed s/\ /,/g)
+
 echo '================================ Collect Start ================================'
 
-[[ $COLLECT == 1 ]] && py_script_exec "${SCRIPT_PATH}/fos_cmd_collect.py --command supportshow"
-[[ $PARSE_PORT == 1 ]] && py_script_exec "${SCRIPT_PATH}/supshow_parse_port.py"
-[[ $PARSE_ZONE == 1 ]] && py_script_exec "${SCRIPT_PATH}/supshow_parse_zone.py"
+[[ $COLLECT == 1 ]] && py_script_exec "${SCRIPT_PATH}/fos_cmd.py --command supportshow --switch $SWITCH_LIST_FMT"
+[[ $PARSE_PORT == 1 ]] && py_script_exec "${SCRIPT_PATH}/sups_port.py"
+[[ $PARSE_ZONE == 1 ]] && py_script_exec "${SCRIPT_PATH}/sups_zone.py"
 
-[[ $PARSE_PORT == 1 && $PARSE_ZONE == 1 ]] && py_script_exec "${SCRIPT_PATH}/supshow_fmt_clean.py"
+[[ $PARSE_PORT == 1 && $PARSE_ZONE == 1 ]] && py_script_exec "${SCRIPT_PATH}/sups_clean.py"
 
 echo '================================ Collect End ================================'
-
