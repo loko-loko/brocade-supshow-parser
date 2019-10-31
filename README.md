@@ -8,6 +8,8 @@ The following scripts collect `Supportshow command` file and parser them to retr
 
 `fos_cmd.py` retrieves the Supportshow or any other commands on the Brocades switches and saves them locally on the host server by switch and command.
 
+He create several switch's queue according to the location, ID and other factor (to customize) and start collect with multitread feature.
+
 ### Arguments
 
 See list of arguments :
@@ -75,7 +77,7 @@ Example :
 2018_10_11/switchshow.switch0001.20.2018_10_11.out
 ```
 
-## (Multithread)Parse Port Information
+## (Multithread) Parse Port Information
 
 `sups_port.py` parse Supportshow input files (Generate by `fos_cmd.py`) and retrieve informations related to the port (type of port, wwn, sfp) and other information on the switch (Hardware, slot, primary switch, ...).
 
