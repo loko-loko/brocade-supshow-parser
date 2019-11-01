@@ -134,7 +134,15 @@ Also allows to archive all files (Compression `BZ2`) and push the csv to the fin
 
 This script get a file with the list of switch to collect (`sw_list.txt`). 
 
-## Final Tree
+## Final
+
+### Excel
+
+See an example of output csv file (Port) :
+
+![](.img/excel_extract_example.png)
+
+### Tree
 
 See an example of final tree :
 
